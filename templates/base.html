@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% block title %}FITAI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+  <style>
+    .user-menu { position:relative; }
+    .user-dropdown {
+      display:none; position:absolute; right:0; top:calc(100% + 0.5rem);
+      background:var(--black2); border:2px solid var(--border2);
+      min-width:200px; z-index:999; padding:0.5rem 0;
+    }
+    .user-dropdown.show { display:block; }
+    .user-dropdown-item {
+      display:flex; align-items:center; gap:0.6rem;
+      padding:0.6rem 1rem; font-family:var(--font-body); font-size:0.85rem;
+      color:var(--gray); text-decoration:none; cursor:pointer;
+      border:none; background:none; width:100%; text-align:left;
+    }
+    .user-dropdown-item:hover { background:var(--black3); color:var(--green); }
+    .user-dropdown-label {
+      padding:0.5rem 1rem; font-family:var(--font-mono); font-size:0.6rem;
+      letter-spacing:1.5px; color:var(--gray2); border-bottom:1px solid var(--border);
+      margin-bottom:0.25rem;
+    }
+    .user-dropdown-name {
+      padding:0.3rem 1rem 0.5rem; font-family:var(--font-cond); font-size:0.9rem;
+      font-weight:700; color:var(--white); letter-spacing:1px;
+      border-bottom:1px solid var(--border); margin-bottom:0.25rem;
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-wordmark">FIT<em>AI</em></div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="nav-item {% if request.path=='/dashboard' %}active{% endif %}">
+      <i class="fas fa-bolt nav-icon"></i> Dashboard
+    </a>
+    <a href="/planner" class="nav-item {% if request.path=='/planner' %}active{% endif %}">
+      <i class="fas fa-dumbbell nav-icon"></i> Planner
+    </a>
+    <a href="/progress" class="nav-item {% if request.path=='/progress' %}active{% endif %}">
+      <i class="fas fa-chart-bar nav-icon"></i> Progress
+    </a>
+    <a href="/nutrition" class="nav-item {% if request.path=='/nutrition' %}active{% endif %}">
+      <i class="fas fa-leaf nav-icon"></i> Nutrition
+    </a>
+
+    <div class="sidebar-divider"></div>
+
+    <a href="#" class="nav-item" onclick="openChat();return false;">
+      <i class="fas fa-robot nav-icon"></i> AI Coach
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="ai-pill">
+      <div class="ai-dot"></div>
+      MULTI-MODEL AI · ONLINE
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main-content">
+  <!-- Ticker -->
+  <div class="ticker">
+    <div class="ticker-inner" id="tickerInner"></div>
+  </div>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="topbar-title">{% block page_label %}<span>—</span>{% endblock %}</div>
+    <div class="topbar-right">
+      <button class="tbar-btn" onclick="openChat()" title="AI Coach">
+        <i class="fas fa-robot"></i>
+        <span class="tbar-pulse"></span>
+      </button>
+      <div class="user-menu">
+        <div class="avatar-btn" id="avatarBtn" onclick="toggleUserMenu()">AT</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-label">SIGNED IN AS</div>
+          <div class="user-dropdown-name" id="userDropdownName">Athlete</div>
+          <a href="/planner" class="user-dropdown-item"><i class="fas fa-user"></i> Profile</a>
+          <button class="user-dropdown-item" onclick="doLogout()" style="color:var(--red);"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="page-content">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<!-- ── CHAT PANEL ── -->
+<div class="chat-backdrop" id="chatBackdrop" onclick="closeChat()"></div>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-hdr">
+    <div class="chat-hdr-left">
+      <div class="chat-avatar"><i class="fas fa-robot"></i></div>
+      <div>
+        <div class="chat-name">FitAI Coach</div>
+        <div class="chat-sub">● MULTI-MODEL AI ONLINE</div>
+      </div>
+    </div>
+    <button class="btn-icon-sq" onclick="closeChat()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg msg-ai">
+      <div class="msg-bubble">Hey athlete 💪 I'm your FitAI coach. Ask me anything — form, programming, nutrition, recovery. Let's get to work.</div>
+    </div>
+  </div>
+  <div class="chat-input-wrap">
+    <input class="chat-input" id="chatInput" placeholder="Ask your coach..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send-btn" onclick="sendChat()"><i class="fas fa-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- ── WORKOUT TIMER MODAL ── -->
+<div class="modal-backdrop" id="timerModal">
+  <div class="timer-modal">
+    <div class="timer-label">// WORKOUT IN PROGRESS</div>
+    <div class="timer-clock" id="timerClock">00:00</div>
+    <div class="timer-exercise" id="timerExercise">SESSION ACTIVE</div>
+    <div class="timer-btns">
+      <button class="btn btn-outline btn-sm" id="timerPauseBtn" onclick="togglePause()"><i class="fas fa-pause"></i> Pause</button>
+      <button class="btn btn-red btn-sm" onclick="endWorkout()"><i class="fas fa-stop"></i> Finish</button>
+    </div>
+    <div style="margin-top:1.5rem; font-family:var(--font-mono); font-size:0.6rem; letter-spacing:2px; color:var(--gray)">
+      CALORIES: <span id="timerCal" style="color:var(--green)">0</span> EST.
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/fitai-store.js"></script>
+<script src="/static/js/main.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

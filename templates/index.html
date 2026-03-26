@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>FITAI — Adaptive AI Workout Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+  <style>
+    body { overflow-x: hidden; }
+
+    /* NAV */
+    .land-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px;
+      background: rgba(8,8,8,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .land-logo { font-family: 'Black Han Sans', sans-serif; font-size: 1.5rem; letter-spacing: 5px; }
+    .land-logo em { color: #00ff88; font-style: normal; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 8rem 2.5rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+    .hero-glow {
+      position: absolute;
+      top: 20%; right: -10%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-corner {
+      position: absolute; top: 80px; right: 2.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 2px;
+      color: #333; text-align: right; line-height: 2;
+    }
+    .hero-corner span { color: #00ff88; }
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 4px;
+      text-transform: uppercase; color: #00ff88;
+      margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-eyebrow::before { content: ''; display: block; width: 40px; height: 1px; background: #00ff88; }
+    .hero-h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(5rem, 14vw, 11rem);
+      line-height: 0.88;
+      letter-spacing: 2px;
+      margin-bottom: 2rem;
+    }
+    .hero-h1 .line-green { color: #00ff88; display: block; }
+    .hero-h1 .line-outline {
+      -webkit-text-stroke: 2px #2e2e2e;
+      color: transparent; display: block;
+    }
+    .hero-bottom {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 2rem;
+    }
+    .hero-desc {
+      max-width: 400px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 1rem; font-weight: 300;
+      color: #888; line-height: 1.7;
+    }
+    .hero-cta-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .cta-main {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.9rem 2rem;
+      background: #00ff88; color: #080808;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
+      border: 2px solid #00ff88;
+      transition: all 0.15s;
+    }
+    .cta-main:hover {
+      background: transparent; color: #00ff88;
+      transform: translate(-3px,-3px);
+      box-shadow: 6px 6px 0 #00ff88;
+    }
+    .cta-sec {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.9rem 2rem;
+      background: transparent; color: #888;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      border: 2px solid #222;
+      transition: all 0.15s;
+    }
+    .cta-sec:hover { border-color: #888; color: #f5f5f5; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 2px solid #1a1a1a;
+      border-bottom: 2px solid #1a1a1a;
+    }
+    .stats-bar-item {
+      padding: 1.75rem 1.5rem;
+      border-right: 1px solid #1a1a1a;
+      transition: background 0.15s;
+    }
+    .stats-bar-item:last-child { border-right: none; }
+    .stats-bar-item:hover { background: rgba(0,255,136,0.04); }
+    .sb-num {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 2.5rem; letter-spacing: 1px;
+      color: #00ff88; line-height: 1;
+    }
+    .sb-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 2px;
+      text-transform: uppercase; color: #444;
+      margin-top: 0.3rem;
+    }
+
+    /* FEATURES */
+    .features { padding: 5rem 2.5rem; }
+    .feat-header {
+      margin-bottom: 3rem;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      border-bottom: 1px solid #1a1a1a; padding-bottom: 1.5rem;
+    }
+    .feat-title {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      line-height: 1; letter-spacing: 2px;
+    }
+    .feat-title em { color: #00ff88; font-style: normal; display: block; }
+    .feat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 2px; color: #333;
+    }
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: #1a1a1a;
+      border: 1px solid #1a1a1a;
+    }
+    .feat-card {
+      background: #080808; padding: 2rem 1.5rem;
+      transition: background 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; background: #00ff88;
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .feat-card:hover { background: rgba(0,255,136,0.03); }
+    .feat-card:hover::before { transform: scaleX(1); }
+    .feat-ico {
+      font-size: 1.5rem; color: #00ff88;
+      margin-bottom: 1rem;
+    }
+    .feat-card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem; font-weight: 900; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 0.5rem;
+    }
+    .feat-card-desc {
+      font-size: 0.875rem; color: #555;
+      line-height: 1.65; font-weight: 300;
+    }
+    .feat-card-tag {
+      margin-top: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 1.5px;
+      color: #333; text-transform: uppercase;
+    }
+
+    /* FOOTER */
+    .land-footer {
+      border-top: 1px solid #1a1a1a;
+      padding: 1.5rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 2px;
+      color: #333; text-transform: uppercase;
+    }
+    .land-footer span { color: #00ff88; }
+
+    @media(max-width:600px){
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+      .feat-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .hero-corner { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="land-nav">
+  <div class="land-logo">FIT<em>AI</em></div>
+  <div style="display:flex;gap:0.5rem;align-items:center;">
+    <a href="/dashboard" class="cta-sec" style="padding:0.5rem 1.25rem;font-size:0.75rem;">Dashboard</a>
+    <a href="/planner" class="cta-main" style="padding:0.5rem 1.25rem;font-size:0.75rem;">Start &rarr;</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-corner">
+    MODEL / <span>QWEN3-CODER:FREE</span><br>
+    PROVIDER / <span>OPENROUTER</span><br>
+    VERSION / <span>2.0</span><br>
+    STATUS / <span>ONLINE</span>
+  </div>
+
+  <div class="hero-eyebrow">AI-POWERED PERSONAL TRAINING</div>
+  <h1 class="hero-h1">
+    <span class="line-outline">TRAIN</span>
+    <span class="line-green">SMARTER</span>
+    NOT HARDER
+  </h1>
+  <div class="hero-bottom">
+    <p class="hero-desc">Generic plans don't fit everyone. FitAI builds adaptive, science-backed workout routines that evolve with you — personalized, progressive, free.</p>
+    <div class="hero-cta-group">
+      <a href="/planner" class="cta-main"><i class="fas fa-dumbbell"></i> Build My Plan</a>
+      <a href="/dashboard" class="cta-sec"><i class="fas fa-chart-bar"></i> Dashboard</a>
+    </div>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stats-bar-item">
+    <div class="sb-num">100%</div>
+    <div class="sb-label">Personalized to you</div>
+  </div>
+  <div class="stats-bar-item">
+    <div class="sb-num">AI</div>
+    <div class="sb-label">Adaptive programming</div>
+  </div>
+  <div class="stats-bar-item">
+    <div class="sb-num">24/7</div>
+    <div class="sb-label">Live AI coaching</div>
+  </div>
+  <div class="stats-bar-item">
+    <div class="sb-num">FREE</div>
+    <div class="sb-label">Qwen3-coder model</div>
+  </div>
+</div>
+
+<section class="features">
+  <div class="feat-header">
+    <div class="feat-title">BUILT FOR<em>REAL ATHLETES</em></div>
+    <div class="feat-num">04 CORE MODULES</div>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-ico"><i class="fas fa-brain"></i></div>
+      <div class="feat-card-title">AI Workout Planner</div>
+      <div class="feat-card-desc">Qwen3-Coder generates scientifically-backed, periodized routines tailored to your fitness level, goals, and available equipment.</div>
+      <div class="feat-card-tag">01 / PERSONALIZATION ENGINE</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><i class="fas fa-chart-bar"></i></div>
+      <div class="feat-card-title">Progress Tracking</div>
+      <div class="feat-card-desc">Log every set, track body metrics, and visualize strength gains over time. The AI analyzes your data and adapts the plan accordingly.</div>
+      <div class="feat-card-tag">02 / ADAPTIVE ANALYTICS</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><i class="fas fa-leaf"></i></div>
+      <div class="feat-card-title">Nutrition Planning</div>
+      <div class="feat-card-desc">AI-generated meal plans synced to your workout schedule. Macro targets optimized for muscle gain, fat loss, or performance.</div>
+      <div class="feat-card-tag">03 / MACRO INTELLIGENCE</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico"><i class="fas fa-robot"></i></div>
+      <div class="feat-card-title">AI Coach Chat</div>
+      <div class="feat-card-desc">Form checks, exercise swaps, injury advice, motivation — your AI coach is always available, always learning from your sessions.</div>
+      <div class="feat-card-tag">04 / REAL-TIME COACHING</div>
+    </div>
+  </div>
+</section>
+
+<footer class="land-footer">
+  <div>FITAI &copy; 2025 — ADAPTIVE WORKOUT INTELLIGENCE</div>
+  <div>POWERED BY <span>QWEN3-CODER:FREE</span> VIA OPENROUTER</div>
+</footer>
+
+</body>
+</html>

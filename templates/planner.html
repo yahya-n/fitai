@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% block title %}PLANNER — FITAI{% endblock %}
+{% block page_label %}<span>WORKOUT</span> PLANNER{% endblock %}
+
+{% block content %}
+
+<div id="formView" class="anim">
+  <div class="g2" style="align-items:start;">
+
+    <!-- PROFILE FORM -->
+    <div>
+      <div class="card mb2">
+        <div class="card-label">// ATHLETE PROFILE</div>
+        <div class="g2">
+          <div class="form-row">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" id="p_name" placeholder="Athlete name"/>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Age</label>
+            <input type="number" class="form-control" id="p_age"/>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Gender</label>
+            <select class="form-control" id="p_gender">
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Fitness Level</label>
+            <select class="form-control" id="p_level">
+              <option>Beginner</option><option>Intermediate</option>
+              <option>Advanced</option><option>Elite</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Weight (kg)</label>
+            <input type="number" class="form-control" id="p_weight"/>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Height (cm)</label>
+            <input type="number" class="form-control" id="p_height"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb2">
+        <div class="card-label">// TRAINING PARAMETERS</div>
+        <div class="form-row">
+          <label class="form-label">Primary Goal</label>
+          <select class="form-control" id="p_goal">
+            <option>Muscle Gain (Hypertrophy)</option>
+            <option>Fat Loss</option>
+            <option>Strength Building</option>
+            <option>Endurance & Cardio</option>
+            <option>General Fitness</option>
+            <option>Athletic Performance</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Available Equipment</label>
+          <select class="form-control" id="p_equipment">
+            <option>Full Gym (Barbells, Machines, Cables)</option>
+            <option>Home Gym (Dumbbells + Barbell)</option>
+            <option>Dumbbells Only</option>
+            <option>Resistance Bands Only</option>
+            <option>No Equipment (Bodyweight)</option>
+          </select>
+        </div>
+        <div class="g2">
+          <div class="form-row">
+            <label class="form-label">Days / Week</label>
+            <select class="form-control" id="p_days">
+              <option>2</option><option>3</option>
+              <option>4</option><option>5</option><option>6</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Session (min)</label>
+            <select class="form-control" id="p_session">
+              <option>30</option><option>45</option>
+              <option>60</option><option>75</option><option>90</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Plan Duration (wks)</label>
+            <select class="form-control" id="p_weeks">
+              <option>2</option><option>4</option>
+              <option>6</option><option>8</option><option>12</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Injuries / Limitations</label>
+          <input type="text" class="form-control" id="p_limits" placeholder="E.g. knee pain, no overhead pressing..."/>
+        </div>
+        <button class="btn btn-green btn-full btn-lg mt1" onclick="buildPlan()">
+          <i class="fas fa-brain"></i>&nbsp; GENERATE AI PLAN
+        </button>
+      </div>
+
+      <!-- Active plan indicator -->
+      <div class="card" id="activePlanCard" style="border-color:rgba(0,255,136,0.3);display:none;">
+        <div class="card-label">// ACTIVE PLAN</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+          <div>
+            <div style="font-family:var(--font-cond);font-size:1rem;font-weight:800;letter-spacing:1px;" id="activePlanName"></div>
+            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--gray);letter-spacing:1px;margin-top:0.3rem;" id="activePlanMeta"></div>
+          </div>
+          <div style="display:flex;gap:0.4rem;">
+            <a href="/dashboard" class="btn btn-green btn-sm"><i class="fas fa-bolt"></i> Dashboard</a>
+            <button class="btn btn-red btn-sm" onclick="deactivatePlan()"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXERCISE LOOKUP + HOW IT WORKS -->
+    <div>
+      <div class="card mb2">
+        <div class="card-label">// EXERCISE ENCYCLOPEDIA</div>
+        <div style="display:flex;gap:0;">
+          <input type="text" class="form-control" id="exSearch"
+            placeholder="e.g. pull-up, squat, deadlift..."
+            style="flex:1;border-right:none;"
+            onkeydown="if(event.key==='Enter')lookupEx()"/>
+          <button class="btn btn-green" style="padding:0.7rem 1.1rem;" onclick="lookupEx()">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+        <div id="exResult" style="margin-top:0.75rem;">
+          <div style="text-align:center;padding:2.5rem 1rem;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;color:var(--gray2);">
+            SEARCH ANY EXERCISE FOR<br>AI-POWERED FORM + SCIENCE BREAKDOWN
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(0,255,136,0.15);">
+        <div class="card-label">// HOW IT WORKS</div>
+        <div style="display:flex;flex-direction:column;gap:0.85rem;">
+          <div style="display:flex;gap:0.85rem;align-items:flex-start;">
+            <div style="font-family:var(--font-display);font-size:2rem;color:var(--green);line-height:1;flex-shrink:0;">01</div>
+            <div style="font-size:0.85rem;color:var(--gray);line-height:1.6;padding-top:0.2rem;">Fill in your profile — fitness level, goals, available equipment, and weekly availability.</div>
+          </div>
+          <div class="div-h" style="margin:0;"></div>
+          <div style="display:flex;gap:0.85rem;align-items:flex-start;">
+            <div style="font-family:var(--font-display);font-size:2rem;color:var(--green);line-height:1;flex-shrink:0;">02</div>
+            <div style="font-size:0.85rem;color:var(--gray);line-height:1.6;padding-top:0.2rem;">AI generates a fully periodized, science-backed plan with progressive overload built in.</div>
+          </div>
+          <div class="div-h" style="margin:0;"></div>
+          <div style="display:flex;gap:0.85rem;align-items:flex-start;">
+            <div style="font-family:var(--font-display);font-size:2rem;color:var(--green);line-height:1;flex-shrink:0;">03</div>
+            <div style="font-size:0.85rem;color:var(--gray);line-height:1.6;padding-top:0.2rem;">Activate your plan, track workouts, and the dashboard adapts to your performance every week.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING STATE -->
+<div id="loadingView" class="hidden">
+  <div class="loading-screen">
+    <div class="spinner" style="width:56px;height:56px;border-width:3px;"></div>
+    <div style="font-family:var(--font-display);font-size:2.5rem;letter-spacing:4px;color:var(--green);">BUILDING YOUR PLAN</div>
+    <div class="loading-label" id="loadingMsg">ANALYZING PROFILE...</div>
+    <div style="font-size:0.85rem;color:var(--gray);max-width:380px;text-align:center;line-height:1.7;">
+      AI is applying exercise science principles, periodization theory, and progressive overload to create your personalized program.
+    </div>
+  </div>
+</div>
+
+<!-- PLAN DISPLAY -->
+<div id="planView" class="hidden">
+  <div class="sec-head mb2">
+    <div class="sec-title" id="planTitle">YOUR PLAN</div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn btn-outline btn-sm" onclick="backToForm()">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="savePlanOnly()"><i class="fas fa-save"></i> Save</button>
+      <button class="btn btn-green btn-sm" onclick="activatePlan()"><i class="fas fa-bolt"></i> Activate & Go</button>
+    </div>
+  </div>
+
+  <div id="planOverview" class="alert alert-green mb2"></div>
+
+  <div class="tab-bar" id="planTabs"></div>
+  <div id="planTabContent"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let savedPlan = null;
+let loadingMsgs = ['ANALYZING PROFILE...','APPLYING PERIODIZATION...','CALCULATING VOLUME...','SELECTING EXERCISES...','FINALIZING YOUR PLAN...'];
+let loadTicker;
+
+// ─── INIT: Load profile from store ───
+(function initPlanner() {
+  const p = FitStore.getProfile();
+  document.getElementById('p_name').value = p.name || '';
+  document.getElementById('p_age').value = p.age || 25;
+  setSelectValue('p_gender', p.gender);
+  setSelectValue('p_level', p.fitness_level);
+  document.getElementById('p_weight').value = p.weight || 75;
+  document.getElementById('p_height').value = p.height || 178;
+  setSelectValue('p_goal', p.goal);
+  setSelectValue('p_equipment', p.equipment);
+  setSelectValue('p_days', String(p.days_per_week || 4));
+  setSelectValue('p_session', String(p.session_duration || 60));
+  setSelectValue('p_weeks', String(p.plan_duration || 4));
+  document.getElementById('p_limits').value = p.limitations || '';
+
+  // Show active plan indicator
+  const activePlan = FitStore.getActivePlan();
+  if (activePlan) {
+    document.getElementById('activePlanCard').style.display = 'block';
+    document.getElementById('activePlanName').textContent = (activePlan.plan_name || 'Active Plan').toUpperCase();
+    document.getElementById('activePlanMeta').textContent = `ACTIVATED ${activePlan._activated_on || 'RECENTLY'} · ${activePlan.weekly_schedule?.length || 0} WEEKS`;
+  }
+})();
+
+function setSelectValue(id, val) {
+  const el = document.getElementById(id);
+  if (!el || !val) return;
+  for (let i = 0; i < el.options.length; i++) {
+    if (el.options[i].value === val || el.options[i].text === val) {
+      el.selectedIndex = i;
+      break;
+    }
+  }
+}
+
+function getFormProfile() {
+  return {
+    name: document.getElementById('p_name').value || 'Athlete',
+    age: document.getElementById('p_age').value,
+    gender: document.getElementById('p_gender').value,
+    fitness_level: document.getElementById('p_level').value,
+    weight: document.getElementById('p_weight').value,
+    height: document.getElementById('p_height').value,
+    goal: document.getElementById('p_goal').value,
+    equipment: document.getElementById('p_equipment').value,
+    days_per_week: document.getElementById('p_days').value,
+    session_duration: document.getElementById('p_session').value,
+    duration: document.getElementById('p_weeks').value,
+    limitations: document.getElementById('p_limits').value || 'None'
+  };
+}
+
+function buildPlan() {
+  const profile = getFormProfile();
+
+  // Save profile to store
+  FitStore.setProfile({
+    name: profile.name,
+    age: Number(profile.age),
+    gender: profile.gender,
+    fitness_level: profile.fitness_level,
+    weight: Number(profile.weight),
+    height: Number(profile.height),
+    goal: profile.goal,
+    equipment: profile.equipment,
+    days_per_week: Number(profile.days_per_week),
+    session_duration: Number(profile.session_duration),
+    plan_duration: Number(profile.duration),
+    limitations: profile.limitations
+  });
+
+  document.getElementById('formView').classList.add('hidden');
+  document.getElementById('planView').classList.add('hidden');
+  document.getElementById('loadingView').classList.remove('hidden');
+
+  let mi = 0;
+  const msgEl = document.getElementById('loadingMsg');
+  loadTicker = setInterval(() => { msgEl.textContent = loadingMsgs[mi++ % loadingMsgs.length]; }, 1800);
+
+  fetch('/api/generate-plan', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({profile})
+  })
+  .then(r => r.json())
+  .then(data => {
+    clearInterval(loadTicker);
+    document.getElementById('loadingView').classList.add('hidden');
+    if (data.success) {
+      savedPlan = data.plan;
+      renderPlan(data.plan);
+      document.getElementById('planView').classList.remove('hidden');
+    } else {
+      document.getElementById('formView').classList.remove('hidden');
+      showToast('error', 'Failed to generate plan: ' + (data.error || 'Check API key'));
+    }
+  })
+  .catch(e => {
+    clearInterval(loadTicker);
+    document.getElementById('loadingView').classList.add('hidden');
+    document.getElementById('formView').classList.remove('hidden');
+    showToast('error', 'Network error: ' + e.message);
+  });
+}
+
+function renderPlan(plan) {
+  document.getElementById('planTitle').textContent = (plan.plan_name || 'YOUR PLAN').toUpperCase();
+  document.getElementById('planOverview').innerHTML = '<i class="fas fa-brain"></i> ' + (plan.overview || '');
+
+  const weeks = plan.weekly_schedule || [];
+  const tabBar = document.getElementById('planTabs');
+  const tabContent = document.getElementById('planTabContent');
+  tabBar.innerHTML = '';
+  tabContent.innerHTML = '';
+
+  weeks.forEach((week, wi) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (wi === 0 ? ' active' : '');
+    btn.textContent = 'WEEK ' + (wi + 1);
+    btn.onclick = () => switchPlanTab(wi);
+    tabBar.appendChild(btn);
+
+    const pane = document.createElement('div');
+    pane.className = 'tab-pane' + (wi === 0 ? ' active' : '');
+    pane.id = 'pw' + wi;
+    let html = '';
+    (week.days || []).forEach(day => {
+      const isRest = !day.workout || day.workout.length === 0;
+      html += `<div class="day-acc">
+        <div class="day-acc-hdr" onclick="toggleAcc(this)">
+          <div class="day-acc-title">
+            <span class="day-name">${(day.day||'').toUpperCase()}</span> ${(day.focus||'Rest').toUpperCase()}
+          </div>
+          <div class="day-acc-meta">
+            ${day.estimated_calories ? `<span class="badge badge-orange">${day.estimated_calories} CAL</span>` : ''}
+            <span class="badge ${isRest?'badge-gray':'badge-green'}">${isRest?'REST':'TRAIN'}</span>
+            <i class="fas fa-plus" style="color:var(--gray);font-size:0.7rem;margin-left:0.5rem;"></i>
+          </div>
+        </div>
+        <div class="day-acc-body">`;
+
+      if (isRest) {
+        html += `<div style="font-size:0.85rem;color:var(--gray);padding:0.5rem 0;line-height:1.6;">Active recovery. Light walking, stretching, or yoga. Let your muscles repair and grow stronger.</div>`;
+      } else {
+        if (day.warmup?.length) {
+          html += `<div class="day-section-label">WARM-UP</div>`;
+          day.warmup.forEach(w => { html += `<div style="padding:0.35rem 0.5rem;font-size:0.8rem;color:var(--gray);border-left:2px solid var(--border2);margin-bottom:2px;">${w.exercise} — ${w.duration}</div>`; });
+        }
+        if (day.workout?.length) {
+          html += `<div class="day-section-label">MAIN WORKOUT</div>`;
+          day.workout.forEach((ex, i) => {
+            html += `<div class="ex-row">
+              <div class="ex-idx">${String(i+1).padStart(2,'0')}</div>
+              <div style="flex:1">
+                <div class="ex-name">${ex.exercise||''}</div>
+                <div class="ex-muscle">${(ex.muscle_group||'').toUpperCase()}${ex.notes ? ' · ' + ex.notes.substring(0,50) : ''}</div>
+              </div>
+              <div class="ex-scheme">${ex.sets}×${ex.reps}<br><span style="color:var(--gray);font-size:0.6rem">${ex.rest||''}</span></div>
+            </div>`;
+          });
+        }
+        if (day.cooldown?.length) {
+          html += `<div class="day-section-label">COOL-DOWN</div>`;
+          day.cooldown.forEach(c => { html += `<div style="padding:0.35rem 0.5rem;font-size:0.8rem;color:var(--gray);border-left:2px solid var(--border2);margin-bottom:2px;">${c.exercise} — ${c.duration}</div>`; });
+        }
+      }
+      html += `</div></div>`;
+    });
+    pane.innerHTML = html;
+    tabContent.appendChild(pane);
+  });
+
+  // Extras tab
+  const extraBtn = document.createElement('button');
+  extraBtn.className = 'tab-btn';
+  extraBtn.textContent = 'NOTES & TIPS';
+  extraBtn.onclick = () => switchPlanTab(weeks.length);
+  tabBar.appendChild(extraBtn);
+
+  const extraPane = document.createElement('div');
+  extraPane.className = 'tab-pane';
+  extraPane.id = 'pw' + weeks.length;
+  let eHTML = '';
+  if (plan.nutrition_tips?.length) {
+    eHTML += `<div class="card mb2"><div class="card-label">// NUTRITION TIPS</div>
+      ${plan.nutrition_tips.map(t => `<div class="alert alert-green">${t}</div>`).join('')}
+    </div>`;
+  }
+  if (plan.progression_notes) {
+    eHTML += `<div class="card mb2"><div class="card-label">// PROGRESSION NOTES</div>
+      <p style="font-size:0.875rem;color:var(--gray);line-height:1.7;">${plan.progression_notes}</p>
+    </div>`;
+  }
+  if (plan.safety_reminders?.length) {
+    eHTML += `<div class="card"><div class="card-label">// SAFETY REMINDERS</div>
+      ${plan.safety_reminders.map(r => `<div class="alert alert-yellow">${r}</div>`).join('')}
+    </div>`;
+  }
+  extraPane.innerHTML = eHTML;
+  tabContent.appendChild(extraPane);
+}
+
+function switchPlanTab(idx) {
+  document.querySelectorAll('#planTabs .tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('#planTabContent .tab-pane').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+
+function toggleAcc(hdr) {
+  const body = hdr.nextElementSibling;
+  const icon = hdr.querySelector('.fa-plus,.fa-minus');
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  if (icon) { icon.classList.toggle('fa-plus', open); icon.classList.toggle('fa-minus', !open); }
+}
+
+function backToForm() {
+  document.getElementById('formView').classList.remove('hidden');
+  document.getElementById('planView').classList.add('hidden');
+}
+
+function savePlanOnly() {
+  if (savedPlan) {
+    localStorage.setItem('fitai_plan', JSON.stringify(savedPlan));
+    showToast('success', 'Plan saved!');
+  }
+}
+
+function activatePlan() {
+  if (!savedPlan) return;
+  FitStore.setActivePlan(savedPlan);
+  localStorage.setItem('fitai_plan', JSON.stringify(savedPlan));
+  showToast('success', 'Plan activated! Redirecting to dashboard...');
+  setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
+}
+
+function deactivatePlan() {
+  FitStore.clearActivePlan();
+  document.getElementById('activePlanCard').style.display = 'none';
+  showToast('info', 'Plan deactivated.');
+}
+
+async function lookupEx() {
+  const name = document.getElementById('exSearch').value.trim();
+  if (!name) return;
+  const res = document.getElementById('exResult');
+  res.innerHTML = '<div style="padding:1.5rem;text-align:center;"><div class="spinner"></div><div class="loading-label mt1">ANALYZING...</div></div>';
+
+  try {
+    const r = await fetch('/api/exercise-info', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({exercise: name})
+    });
+    const data = await r.json();
+    if (data.success) {
+      const i = data.info;
+      res.innerHTML = `
+        <div style="margin-top:0.75rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:0.75rem;">
+            <div style="font-family:var(--font-cond);font-size:1.1rem;font-weight:800;letter-spacing:1px;">${i.name||name}</div>
+            <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
+              ${i.difficulty ? `<span class="badge badge-green">${i.difficulty}</span>` : ''}
+              ${i.calories_per_minute ? `<span class="badge badge-orange">${i.calories_per_minute} cal/min</span>` : ''}
+            </div>
+          </div>
+          ${i.muscle_groups ? `<div style="margin-bottom:0.75rem;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;">
+            <span style="color:var(--gray)">PRIMARY: </span><span style="color:var(--green)">${(i.muscle_groups.primary||[]).join(', ')}</span><br>
+            ${i.muscle_groups.secondary?.length ? `<span style="color:var(--gray)">SECONDARY: </span><span style="color:var(--gray)">${i.muscle_groups.secondary.join(', ')}</span>` : ''}
+          </div>` : ''}
+          ${i.instructions?.length ? `<div style="margin-bottom:0.75rem;">
+            <div class="day-section-label">INSTRUCTIONS</div>
+            ${i.instructions.map((s,n) => `<div style="padding:0.3rem 0.5rem;font-size:0.78rem;color:var(--gray);border-left:2px solid var(--green);margin-bottom:2px;">${n+1}. ${s}</div>`).join('')}
+          </div>` : ''}
+          ${i.common_mistakes?.length ? `<div>
+            <div class="day-section-label" style="color:var(--red);">⚠ COMMON MISTAKES</div>
+            ${i.common_mistakes.map(m => `<div style="font-size:0.78rem;color:var(--gray);margin-bottom:0.2rem;padding-left:0.5rem;">• ${m}</div>`).join('')}
+          </div>` : ''}
+        </div>`;
+    } else {
+      res.innerHTML = '<div class="alert alert-red mt1">Could not fetch data. Check API key.</div>';
+    }
+  } catch(e) {
+    res.innerHTML = '<div class="alert alert-red mt1">Network error: ' + e.message + '</div>';
+  }
+}
+</script>
+{% endblock %}

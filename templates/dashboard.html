@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% block title %}DASHBOARD — FITAI{% endblock %}
+{% block page_label %}<span>DASHBOARD</span>{% endblock %}
+
+{% block content %}
+
+<!-- HERO ROW -->
+<div class="anim" style="margin-bottom:1rem;">
+  <div style="display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:stretch;">
+
+    <!-- Welcome Block -->
+    <div class="card card-accent" style="padding:2rem;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:-1rem;top:-2rem;font-family:var(--font-display);font-size:9rem;color:rgba(0,255,136,0.04);pointer-events:none;letter-spacing:-4px;line-height:1;" id="heroWatermark">PUSH</div>
+      <div class="card-label">// SESSION STATUS</div>
+      <div style="font-family:var(--font-display);font-size:2.5rem;letter-spacing:3px;line-height:1.1;margin-bottom:0.75rem;" id="heroGreeting">
+        GOOD MORNING,<br><span style="color:var(--green)">ATHLETE</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:2px;color:var(--gray);margin-bottom:1.5rem;" id="heroMeta">
+        LOADING...
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="btn btn-green" onclick="startTodayWorkout()" id="startBtn"><i class="fas fa-play"></i> Start Session</button>
+        <a href="/planner" class="btn btn-outline"><i class="fas fa-refresh"></i> New Plan</a>
+      </div>
+    </div>
+
+    <!-- Ring Cluster -->
+    <div class="card" style="padding:1.25rem;display:flex;flex-direction:column;gap:1rem;align-items:center;justify-content:center;min-width:200px;">
+      <div class="card-label" style="align-self:flex-start;">// TODAY'S RINGS</div>
+      <div style="display:flex;gap:1rem;">
+        <div style="text-align:center;">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+              <circle class="ring-track" cx="50" cy="50" r="40"/>
+              <circle class="ring-arc" cx="50" cy="50" r="40" stroke="var(--green)"
+                stroke-dasharray="251.2" id="r1"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-val" style="color:var(--green)" id="r1val">0%</div>
+              <div class="ring-lbl">MOVE</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+              <circle class="ring-track" cx="50" cy="50" r="40"/>
+              <circle class="ring-arc" cx="50" cy="50" r="40" stroke="var(--blue)"
+                stroke-dasharray="251.2" id="r2"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-val" style="color:var(--blue)" id="r2val">0%</div>
+              <div class="ring-lbl">PLAN</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAT BLOCKS -->
+<div class="g4 mb2 anim d1">
+  <div class="stat-block">
+    <i class="fas fa-fire stat-bg-icon"></i>
+    <div class="stat-eyebrow">CALORIES BURNED</div>
+    <div class="stat-num" style="color:var(--orange)" id="statCalories">0<span class="stat-unit">kcal</span></div>
+    <div class="stat-delta delta-up" id="statCalDelta"></div>
+  </div>
+  <div class="stat-block">
+    <i class="fas fa-dumbbell stat-bg-icon"></i>
+    <div class="stat-eyebrow">WORKOUTS DONE</div>
+    <div class="stat-num" style="color:var(--green)" id="statWorkouts">0<span class="stat-unit">sessions</span></div>
+    <div class="stat-delta delta-up" id="statWkDelta"></div>
+  </div>
+  <div class="stat-block">
+    <i class="fas fa-clock stat-bg-icon"></i>
+    <div class="stat-eyebrow">TOTAL HOURS</div>
+    <div class="stat-num" style="color:var(--blue)" id="statHours">0<span class="stat-unit">h</span></div>
+    <div class="stat-delta delta-up" id="statHrDelta"></div>
+  </div>
+  <div class="stat-block">
+    <i class="fas fa-bolt stat-bg-icon"></i>
+    <div class="stat-eyebrow">CURRENT STREAK</div>
+    <div class="stat-num" style="color:var(--yellow)" id="statStreak">0<span class="stat-unit">days</span></div>
+    <div class="stat-delta delta-up" id="statStreakDelta"></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT GRID -->
+<div class="g2 anim d2" style="align-items:start;">
+
+  <!-- TODAY'S WORKOUT -->
+  <div>
+    <div class="card mb2">
+      <div class="sec-head">
+        <div class="sec-title" id="todayTitle">TODAY'S PLAN — <em>LOADING</em></div>
+        <div style="display:flex;gap:0.4rem;align-items:center;" id="todayBadges"></div>
+      </div>
+
+      <div id="todayExercises">
+        <div style="text-align:center;padding:2rem;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;color:var(--gray2);">
+          LOADING WORKOUT DATA...
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+        <button class="btn btn-green btn-full" onclick="startTodayWorkout()" id="beginBtn"><i class="fas fa-play"></i> Begin Workout</button>
+      </div>
+    </div>
+
+    <!-- Muscle volume -->
+    <div class="card">
+      <div class="card-label">// MUSCLE VOLUME THIS WEEK</div>
+      <div id="muscleVolume"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <!-- Weekly Calendar -->
+    <div class="card mb2">
+      <div class="card-label">// WEEK AT A GLANCE</div>
+      <div class="week-strip" id="weekStrip"></div>
+      <div class="pb-row">
+        <div class="pb-head"><span>WEEKLY GOAL</span><span id="weekGoalLabel">0/0 DAYS</span></div>
+        <div class="pb-track"><div class="pb-fill" id="weekGoalFill" style="width:0%"></div></div>
+      </div>
+      <div class="pb-row">
+        <div class="pb-head"><span>STREAK PROGRESS</span><span id="streakLabel">0 DAYS</span></div>
+        <div class="pb-track"><div class="pb-fill" style="width:0%;background:var(--green2)" id="streakFill"></div></div>
+      </div>
+    </div>
+
+    <!-- Activity Chart -->
+    <div class="card mb2">
+      <div class="sec-head">
+        <div class="sec-title">ACTIVITY <em>CHART</em></div>
+        <span class="badge badge-gray">28 DAYS</span>
+      </div>
+      <canvas id="actChart" height="110"></canvas>
+    </div>
+
+    <!-- AI Tip -->
+    <div class="card" id="tipCard" style="border-color:rgba(0,255,136,0.3);">
+      <div class="card-label">// AI COACH TIP</div>
+      <div id="tipText" style="font-size:0.875rem;color:var(--gray);line-height:1.7;font-style:italic;">
+        "Click 'New Tip' for a personalized, science-backed fitness insight from your AI coach."
+      </div>
+      <button class="btn btn-ghost mt1" onclick="newTip()"><i class="fas fa-refresh"></i> New Tip</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ═══════════════════════════════════════
+//  DASHBOARD INITIALIZATION FROM STORE
+// ═══════════════════════════════════════
+(function initDashboard() {
+  const stats = FitStore.getStats();
+  const profile = FitStore.getProfile();
+  const log = FitStore.getWorkoutLog();
+
+  // ── Greeting ──
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'GOOD MORNING' : hour < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+  const name = (profile.name || 'ATHLETE').toUpperCase();
+  document.getElementById('heroGreeting').innerHTML = `${greeting},<br><span style="color:var(--green)">${name}</span>`;
+
+  // Watermark based on today's focus
+  const todayData = FitStore.getTodayWorkout();
+  const focusMap = {
+    'leg': 'SQUAT', 'chest': 'BENCH', 'back': 'PULL', 'shoulder': 'PRESS',
+    'arm': 'CURL', 'cardio': 'RUN', 'full': 'TRAIN', 'rest': 'REST'
+  };
+  let watermark = 'PUSH';
+  if (todayData?.workout?.focus) {
+    const f = todayData.workout.focus.toLowerCase();
+    for (const [k, v] of Object.entries(focusMap)) {
+      if (f.includes(k)) { watermark = v; break; }
+    }
+  }
+  document.getElementById('heroWatermark').textContent = watermark;
+
+  // Hero meta
+  if (todayData) {
+    const focusText = todayData.workout?.focus || 'Rest Day';
+    document.getElementById('heroMeta').textContent =
+      `WEEK ${todayData.weekNum} · ${focusText.toUpperCase()} · ${stats.streak}-DAY STREAK ${stats.streak >= 3 ? '🔥' : ''}`;
+  } else {
+    document.getElementById('heroMeta').textContent =
+      `NO ACTIVE PLAN · ${stats.streak}-DAY STREAK · ${stats.totalWorkouts} TOTAL SESSIONS`;
+  }
+
+  // ── Stats ──
+  document.getElementById('statCalories').innerHTML = `${stats.totalCalories.toLocaleString()}<span class="stat-unit">kcal</span>`;
+  document.getElementById('statCalDelta').textContent = `↑ ${stats.weekCalories.toLocaleString()} this week`;
+  document.getElementById('statWorkouts').innerHTML = `${stats.totalWorkouts}<span class="stat-unit">sessions</span>`;
+  const wkDiff = stats.monthWorkouts - stats.lastMonthWorkouts;
+  document.getElementById('statWkDelta').textContent = wkDiff >= 0 ? `↑ +${wkDiff} vs last month` : `↓ ${wkDiff} vs last month`;
+  document.getElementById('statHours').innerHTML = `${stats.totalHours}<span class="stat-unit">h</span>`;
+  document.getElementById('statHrDelta').textContent = '↑ On track';
+  document.getElementById('statStreak').innerHTML = `${stats.streak}<span class="stat-unit">days</span>`;
+  document.getElementById('statStreakDelta').textContent = stats.streak >= 5 ? '★ Incredible!' : stats.streak >= 3 ? '★ Keep going!' : 'Build momentum!';
+
+  // ── Rings ──
+  const daysTarget = profile.days_per_week || 4;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const thisWeekWorkouts = log.filter(w => w.date >= weekStartStr).length;
+
+  const movePct = Math.min(100, Math.round((thisWeekWorkouts / daysTarget) * 100));
+  const planPct = todayData ? Math.min(100, Math.round(((todayData.weekNum || 1) / (FitStore.getActivePlan()?.weekly_schedule?.length || 4)) * 100)) : 0;
+
+  const circumference = 251.2;
+  document.getElementById('r1').setAttribute('stroke-dashoffset', circumference - (circumference * movePct / 100));
+  document.getElementById('r1val').textContent = movePct + '%';
+  document.getElementById('r2').setAttribute('stroke-dashoffset', circumference - (circumference * planPct / 100));
+  document.getElementById('r2val').textContent = planPct + '%';
+
+  // ── Today's Workout ──
+  const exEl = document.getElementById('todayExercises');
+  const badgeEl = document.getElementById('todayBadges');
+
+  if (todayData && todayData.workout && todayData.workout.workout && todayData.workout.workout.length > 0) {
+    const day = todayData.workout;
+    document.getElementById('todayTitle').innerHTML = `TODAY'S PLAN — <em>${(day.focus || 'WORKOUT').toUpperCase()}</em>`;
+
+    let totalCal = day.estimated_calories || 0;
+    let totalMin = Number(profile.session_duration) || 45;
+    badgeEl.innerHTML = `<span class="badge badge-green">~${totalMin} MIN</span><span class="badge badge-orange">~${totalCal} CAL</span>`;
+
+    let html = '';
+    day.workout.forEach((ex, i) => {
+      html += `<div class="ex-row">
+        <div class="ex-idx">${String(i+1).padStart(2,'0')}</div>
+        <div style="flex:1">
+          <div class="ex-name">${ex.exercise || ''}</div>
+          <div class="ex-muscle">${(ex.muscle_group || '').toUpperCase()}</div>
+        </div>
+        <div class="ex-scheme">${ex.sets || ''}×${ex.reps || ''}<br><span style="color:var(--gray);font-size:0.6rem">${ex.rest || ''}</span></div>
+      </div>`;
+    });
+    exEl.innerHTML = html;
+  } else {
+    document.getElementById('todayTitle').innerHTML = `TODAY'S PLAN — <em>NO PLAN</em>`;
+    badgeEl.innerHTML = '';
+    exEl.innerHTML = `
+      <div style="text-align:center;padding:2.5rem 1rem;">
+        <div style="font-family:var(--font-display);font-size:2rem;color:var(--gray2);margin-bottom:0.75rem;">NO ACTIVE PLAN</div>
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;color:var(--gray2);margin-bottom:1.25rem;">
+          GENERATE AN AI-POWERED WORKOUT PLAN TO GET STARTED
+        </div>
+        <a href="/planner" class="btn btn-green"><i class="fas fa-brain"></i> Generate Plan</a>
+      </div>`;
+    document.getElementById('beginBtn').style.display = 'none';
+  }
+
+  // ── Muscle Volume ──
+  const muscleMap = {};
+  const recentLog = log.filter(w => w.date >= weekStartStr);
+  recentLog.forEach(w => {
+    const t = (w.type || '').toLowerCase();
+    if (t.includes('leg')) muscleMap['LEGS'] = (muscleMap['LEGS'] || 0) + Number(w.dur || 30);
+    if (t.includes('chest')) muscleMap['CHEST'] = (muscleMap['CHEST'] || 0) + Number(w.dur || 30);
+    if (t.includes('back')) muscleMap['BACK'] = (muscleMap['BACK'] || 0) + Number(w.dur || 30);
+    if (t.includes('shoulder') || t.includes('arm')) muscleMap['ARMS'] = (muscleMap['ARMS'] || 0) + Number(w.dur || 30);
+    if (t.includes('core') || t.includes('ab')) muscleMap['CORE'] = (muscleMap['CORE'] || 0) + Number(w.dur || 30);
+    if (t.includes('cardio') || t.includes('hiit')) muscleMap['CARDIO'] = (muscleMap['CARDIO'] || 0) + Number(w.dur || 30);
+    if (t.includes('full')) {
+      muscleMap['LEGS'] = (muscleMap['LEGS'] || 0) + 10;
+      muscleMap['CHEST'] = (muscleMap['CHEST'] || 0) + 10;
+      muscleMap['BACK'] = (muscleMap['BACK'] || 0) + 10;
+      muscleMap['ARMS'] = (muscleMap['ARMS'] || 0) + 10;
+      muscleMap['CORE'] = (muscleMap['CORE'] || 0) + 10;
+    }
+  });
+
+  const muscleEl = document.getElementById('muscleVolume');
+  const muscles = Object.entries(muscleMap).sort((a, b) => b[1] - a[1]);
+  const maxVol = muscles.length > 0 ? muscles[0][1] : 1;
+  const colors = ['var(--green)', 'var(--blue)', 'var(--orange)', 'var(--yellow)', 'var(--red)'];
+
+  if (muscles.length === 0) {
+    muscleEl.innerHTML = `<div style="text-align:center;padding:1.5rem;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;color:var(--gray2);">LOG WORKOUTS TO SEE VOLUME BREAKDOWN</div>`;
+  } else {
+    muscleEl.innerHTML = muscles.map((m, i) => {
+      const pct = Math.round((m[1] / maxVol) * 100);
+      const level = pct >= 75 ? 'HIGH' : pct >= 40 ? 'MEDIUM' : 'LOW';
+      return `<div class="pb-row">
+        <div class="pb-head"><span>${m[0]}</span><span>${level}</span></div>
+        <div class="pb-track"><div class="pb-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Week Strip ──
+  const strip = document.getElementById('weekStrip');
+  const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+  const today = new Date();
+  const mondayOffset = (today.getDay() + 6) % 7; // Days since Monday
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - mondayOffset);
+
+  const workoutDates = new Set(log.map(w => w.date));
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    const isToday = dateStr === todayStr;
+    const isDone = workoutDates.has(dateStr);
+
+    const el = document.createElement('div');
+    el.className = 'week-day ' + (isToday ? 'today' : isDone ? 'done' : '');
+    el.innerHTML = `<span>${dayLabels[i]}</span><span class="day-num">${d.getDate()}</span><span>${isDone ? '✓' : isToday ? '◉' : '·'}</span>`;
+    strip.appendChild(el);
+  }
+
+  // Week goal progress
+  const targetDays = profile.days_per_week || 4;
+  document.getElementById('weekGoalLabel').textContent = `${thisWeekWorkouts}/${targetDays} DAYS`;
+  document.getElementById('weekGoalFill').style.width = Math.min(100, (thisWeekWorkouts / targetDays) * 100) + '%';
+
+  // Streak progress
+  document.getElementById('streakLabel').textContent = `${stats.streak} DAYS`;
+  document.getElementById('streakFill').style.width = Math.min(100, (stats.streak / 7) * 100) + '%';
+
+  // ── Activity Chart ──
+  buildActivityChart(log);
+})();
+
+function startTodayWorkout() {
+  const tw = FitStore.getTodayWorkout();
+  if (tw && tw.workout) {
+    startWorkout(tw.workout.focus || 'Workout');
+  } else {
+    startWorkout('General Session');
+  }
+}
+
+// ── Activity Chart with Real Data ──
+function buildActivityChart(log) {
+  const actCtx = document.getElementById('actChart').getContext('2d');
+  const labels = [];
+  const durData = [];
+  const calData = [];
+
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    labels.push(d.getDate());
+
+    // Sum all workouts on this day
+    const dayWorkouts = log.filter(w => w.date === dateStr);
+    const dayDur = dayWorkouts.reduce((s, w) => s + (Number(w.dur) || 0), 0);
+    const dayCal = dayWorkouts.reduce((s, w) => s + (Number(w.cal) || 0), 0);
+    durData.push(dayDur);
+    calData.push(dayCal);
+  }
+
+  new Chart(actCtx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Duration (min)',
+          data: durData,
+          backgroundColor: 'rgba(0,255,136,0.35)',
+          borderColor: 'rgba(0,255,136,0.7)',
+          borderWidth: 1,
+          borderRadius: 0,
+        },
+        {
+          label: 'Calories',
+          data: calData,
+          type: 'line',
+          borderColor: 'rgba(0,195,255,0.7)',
+          backgroundColor: 'rgba(0,195,255,0.06)',
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'y2',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { color: '#555', font: { family: 'JetBrains Mono', size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#333', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { ticks: { color: '#333', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y2: { position: 'right', ticks: { color: '#333', font: { size: 9 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+async function newTip() {
+  const el = document.getElementById('tipText');
+  el.textContent = 'Loading AI tip...';
+  try {
+    const profile = FitStore.getProfile();
+    const stats = FitStore.getStats();
+    const r = await fetch('/api/chat', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: `Give me one powerful, science-backed fitness tip in 2-3 sentences. Be direct and specific. Personalize for: ${profile.goal}, ${profile.fitness_level} level, ${stats.streak} day streak.`,
+        history: []
+      })
+    });
+    const d = await r.json();
+    el.textContent = d.success ? '"' + d.response + '"' : 'Could not load tip. Check your API key.';
+  } catch(e) { el.textContent = 'Network error.'; }
+}
+</script>
+{% endblock %}

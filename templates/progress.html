@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+{% block title %}PROGRESS — FITAI{% endblock %}
+{% block page_label %}<span>PROGRESS</span> TRACKER{% endblock %}
+
+{% block content %}
+
+<div class="anim">
+  <!-- BODY METRICS -->
+  <div class="g4 mb2">
+    <div class="stat-block">
+      <i class="fas fa-weight stat-bg-icon"></i>
+      <div class="stat-eyebrow">BODY WEIGHT</div>
+      <div class="stat-num" style="color:var(--green)" id="metricWeight">--<span class="stat-unit">kg</span></div>
+      <div class="stat-delta" id="metricWeightDelta"></div>
+    </div>
+    <div class="stat-block">
+      <i class="fas fa-percent stat-bg-icon"></i>
+      <div class="stat-eyebrow">BODY FAT</div>
+      <div class="stat-num" style="color:var(--blue)" id="metricFat">--<span class="stat-unit">%</span></div>
+      <div class="stat-delta" id="metricFatDelta"></div>
+    </div>
+    <div class="stat-block">
+      <i class="fas fa-dumbbell stat-bg-icon"></i>
+      <div class="stat-eyebrow">TOTAL WORKOUTS</div>
+      <div class="stat-num" style="color:var(--orange)" id="metricWorkouts">0<span class="stat-unit">sessions</span></div>
+      <div class="stat-delta delta-up" id="metricWkDelta"></div>
+    </div>
+    <div class="stat-block">
+      <i class="fas fa-heartbeat stat-bg-icon"></i>
+      <div class="stat-eyebrow">CURRENT STREAK</div>
+      <div class="stat-num" style="color:var(--red)" id="metricStreak">0<span class="stat-unit">days</span></div>
+      <div class="stat-delta" id="metricStreakDelta"></div>
+    </div>
+  </div>
+
+  <div class="g2 mb2 anim d1" style="align-items:start;">
+    <!-- LOG WORKOUT -->
+    <div class="card">
+      <div class="card-label">// LOG WORKOUT</div>
+      <div class="g2">
+        <div class="form-row" style="grid-column:1/-1;">
+          <label class="form-label">Workout Type</label>
+          <select class="form-control" id="log_type">
+            <option>Chest & Triceps</option>
+            <option>Back & Biceps</option>
+            <option>Legs</option>
+            <option>Shoulders & Arms</option>
+            <option>Full Body</option>
+            <option>Cardio / HIIT</option>
+            <option>Core & Abs</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Duration (min)</label>
+          <input type="number" class="form-control" id="log_dur" value="55"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Calories Burned</label>
+          <input type="number" class="form-control" id="log_cal" value="380"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Intensity</label>
+          <select class="form-control" id="log_intensity">
+            <option>Light</option><option selected>Moderate</option>
+            <option>Hard</option><option>Max Effort</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Mood</label>
+          <select class="form-control" id="log_mood">
+            <option>😴 Tired</option><option selected>😐 Okay</option>
+            <option>💪 Strong</option><option>🔥 On Fire</option>
+          </select>
+        </div>
+        <div class="form-row" style="grid-column:1/-1;">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-control" id="log_notes" placeholder="PR on squats, felt strong..."/>
+        </div>
+      </div>
+      <button class="btn btn-green btn-full mt1" onclick="logWorkout()">
+        <i class="fas fa-check"></i> LOG SESSION
+      </button>
+
+      <div class="div-h"></div>
+      <div class="card-label">// LOG BODY MEASUREMENT</div>
+      <div class="g2">
+        <div class="form-row">
+          <label class="form-label">Weight (kg)</label>
+          <input type="number" class="form-control" id="m_weight" placeholder="75.0" step="0.1"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Body Fat %</label>
+          <input type="number" class="form-control" id="m_fat" placeholder="16.0" step="0.1"/>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-full btn-sm" onclick="logMeasurement()">
+        <i class="fas fa-ruler"></i> LOG MEASUREMENT
+      </button>
+    </div>
+
+    <!-- RECENT LOG -->
+    <div class="card">
+      <div class="sec-head">
+        <div class="sec-title">SESSION <em>LOG</em></div>
+        <span class="badge badge-green" id="logCount">0 SESSIONS</span>
+      </div>
+      <div id="sessionLog" style="display:flex;flex-direction:column;gap:2px;max-height:520px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="g2 mb2 anim d2">
+    <div class="card">
+      <div class="sec-head">
+        <div class="sec-title">WEIGHT <em>TREND</em></div>
+        <span class="badge badge-blue" id="weightChartLabel">ALL TIME</span>
+      </div>
+      <canvas id="weightChart" height="130"></canvas>
+    </div>
+    <div class="card">
+      <div class="sec-head">
+        <div class="sec-title">WORKOUT <em>FREQUENCY</em></div>
+        <span class="badge badge-green">8 WEEKS</span>
+      </div>
+      <canvas id="frequencyChart" height="130"></canvas>
+    </div>
+  </div>
+
+  <!-- AI ANALYSIS -->
+  <div class="card anim d3">
+    <div class="sec-head">
+      <div class="sec-title">AI PROGRESS <em>ANALYSIS</em></div>
+      <button class="btn btn-green btn-sm" onclick="runAnalysis()">
+        <i class="fas fa-brain"></i> ANALYZE
+      </button>
+    </div>
+    <div id="analysisResult">
+      <div style="text-align:center;padding:3rem;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;color:var(--gray2);">
+        CLICK ANALYZE TO GET AI-POWERED<br>INSIGHTS ON YOUR PROGRESS
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ═══════════════════════════════════════
+//  LOAD DATA FROM STORE
+// ═══════════════════════════════════════
+function refreshMetrics() {
+  const stats = FitStore.getStats();
+  const measurements = FitStore.getMeasurements();
+  const profile = FitStore.getProfile();
+
+  // Body metrics
+  if (measurements.length > 0) {
+    const latest = measurements[0];
+    const prev = measurements.length > 1 ? measurements[1] : null;
+
+    if (latest.weight) {
+      document.getElementById('metricWeight').innerHTML = `${Number(latest.weight).toFixed(1)}<span class="stat-unit">kg</span>`;
+      if (prev && prev.weight) {
+        const diff = (latest.weight - prev.weight).toFixed(1);
+        const el = document.getElementById('metricWeightDelta');
+        el.textContent = diff <= 0 ? `↓ ${diff} kg` : `↑ +${diff} kg`;
+        el.className = 'stat-delta ' + (diff <= 0 ? 'delta-down' : 'delta-up');
+      }
+    }
+    if (latest.body_fat) {
+      document.getElementById('metricFat').innerHTML = `${Number(latest.body_fat).toFixed(1)}<span class="stat-unit">%</span>`;
+      if (prev && prev.body_fat) {
+        const diff = (latest.body_fat - prev.body_fat).toFixed(1);
+        const el = document.getElementById('metricFatDelta');
+        el.textContent = diff <= 0 ? `↓ ${diff}% improved` : `↑ +${diff}%`;
+        el.className = 'stat-delta ' + (diff <= 0 ? 'delta-down' : 'delta-up');
+      }
+    }
+  } else {
+    document.getElementById('metricWeight').innerHTML = `${profile.weight || '--'}<span class="stat-unit">kg</span>`;
+    document.getElementById('metricWeightDelta').textContent = 'Log measurements to track';
+    document.getElementById('metricFat').innerHTML = `--<span class="stat-unit">%</span>`;
+    document.getElementById('metricFatDelta').textContent = 'Log measurements to track';
+  }
+
+  // Workout stats
+  document.getElementById('metricWorkouts').innerHTML = `${stats.totalWorkouts}<span class="stat-unit">sessions</span>`;
+  document.getElementById('metricWkDelta').textContent = `${stats.monthWorkouts} this month`;
+  document.getElementById('metricStreak').innerHTML = `${stats.streak}<span class="stat-unit">days</span>`;
+  const streakEl = document.getElementById('metricStreakDelta');
+  if (stats.streak >= 5) {
+    streakEl.textContent = '★ Incredible streak!';
+    streakEl.className = 'stat-delta delta-up';
+  } else if (stats.streak >= 3) {
+    streakEl.textContent = '★ Keep going!';
+    streakEl.className = 'stat-delta delta-up';
+  } else {
+    streakEl.textContent = 'Build your streak!';
+    streakEl.className = 'stat-delta';
+  }
+}
+
+function renderLog() {
+  const log = FitStore.getWorkoutLog();
+  const el = document.getElementById('sessionLog');
+  document.getElementById('logCount').textContent = log.length + ' SESSION' + (log.length !== 1 ? 'S' : '');
+
+  if (log.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:2rem;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:2px;color:var(--gray2);">
+      NO SESSIONS LOGGED YET<br>START TRACKING YOUR WORKOUTS
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = log.slice(0, 20).map(w => `
+    <div class="ex-row" style="flex-direction:column;align-items:flex-start;gap:0.4rem;">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+        <div style="font-family:var(--font-cond);font-size:0.95rem;font-weight:800;letter-spacing:1px;">${(w.type || 'Workout').toUpperCase()}</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--gray);">${w.date || ''}</span>
+          <button onclick="deleteWorkout(${w.id})" style="background:none;border:none;color:var(--gray2);cursor:pointer;font-size:0.7rem;padding:0.2rem;" title="Delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+        <span class="badge badge-blue">${w.dur || 0}MIN</span>
+        <span class="badge badge-orange">${w.cal || 0}CAL</span>
+        <span class="badge badge-green">${(w.intensity || 'Moderate').toUpperCase()}</span>
+        <span class="badge badge-gray">${w.mood || '😐'}</span>
+      </div>
+      ${w.notes ? `<div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--gray);letter-spacing:0.5px;font-style:italic;">${w.notes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function logWorkout() {
+  const entry = {
+    type: document.getElementById('log_type').value,
+    dur: Number(document.getElementById('log_dur').value) || 0,
+    cal: Number(document.getElementById('log_cal').value) || 0,
+    intensity: document.getElementById('log_intensity').value,
+    mood: document.getElementById('log_mood').value,
+    notes: document.getElementById('log_notes').value,
+  };
+
+  if (entry.dur <= 0) {
+    showToast('warning', 'Please enter a valid duration.');
+    return;
+  }
+
+  FitStore.addWorkout(entry);
+  renderLog();
+  refreshMetrics();
+  document.getElementById('log_notes').value = '';
+  showToast('success', 'Session logged! Keep pushing 💪');
+}
+
+function deleteWorkout(id) {
+  FitStore.removeWorkout(id);
+  renderLog();
+  refreshMetrics();
+  buildCharts();
+  showToast('info', 'Session removed.');
+}
+
+function logMeasurement() {
+  const weight = parseFloat(document.getElementById('m_weight').value);
+  const fat = parseFloat(document.getElementById('m_fat').value);
+
+  if (!weight && !fat) {
+    showToast('warning', 'Enter at least one measurement.');
+    return;
+  }
+
+  FitStore.addMeasurement({
+    weight: weight || null,
+    body_fat: fat || null
+  });
+
+  refreshMetrics();
+  buildCharts();
+  document.getElementById('m_weight').value = '';
+  document.getElementById('m_fat').value = '';
+  showToast('success', 'Measurement logged! Track your progress over time 📊');
+}
+
+// ═══════════════════════════════════════
+//  CHARTS
+// ═══════════════════════════════════════
+let weightChartInstance = null;
+let frequencyChartInstance = null;
+
+function buildCharts() {
+  const measurements = FitStore.getMeasurements();
+  const log = FitStore.getWorkoutLog();
+
+  // ── Weight Trend Chart ──
+  if (weightChartInstance) weightChartInstance.destroy();
+  const wCtx = document.getElementById('weightChart').getContext('2d');
+
+  if (measurements.length >= 2) {
+    const sorted = [...measurements].filter(m => m.weight).sort((a, b) => a.date.localeCompare(b.date));
+    const wLabels = sorted.map(m => {
+      const d = new Date(m.date);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    const wData = sorted.map(m => Number(m.weight));
+    const fatData = sorted.filter(m => m.body_fat).length >= 2
+      ? sorted.map(m => m.body_fat ? Number(m.body_fat) : null)
+      : null;
+
+    document.getElementById('weightChartLabel').textContent = `${sorted.length} ENTRIES`;
+
+    const datasets = [{
+      label: 'Weight (kg)',
+      data: wData,
+      borderColor: 'rgba(0,255,136,0.8)',
+      backgroundColor: 'rgba(0,255,136,0.06)',
+      pointBackgroundColor: '#00ff88',
+      pointRadius: 4,
+      tension: 0.4, fill: true,
+    }];
+    if (fatData) {
+      datasets.push({
+        label: 'Body Fat %',
+        data: fatData,
+        borderColor: 'rgba(0,195,255,0.7)',
+        pointBackgroundColor: '#00c3ff',
+        pointRadius: 3,
+        tension: 0.4, fill: false,
+        yAxisID: 'y2',
+      });
+    }
+
+    weightChartInstance = new Chart(wCtx, {
+      type: 'line',
+      data: { labels: wLabels, datasets },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#555', font: { family: 'JetBrains Mono', size: 10 } } } },
+        scales: {
+          x: { ticks: { color: '#333', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+          y: { ticks: { color: '#333', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+          ...(fatData ? { y2: { position: 'right', ticks: { color: '#333', font: { size: 9 } }, grid: { display: false } } } : {})
+        }
+      }
+    });
+  } else {
+    weightChartInstance = new Chart(wCtx, {
+      type: 'line',
+      data: { labels: ['Now'], datasets: [{ label: 'Weight (kg)', data: [0], borderColor: 'rgba(0,255,136,0.3)' }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#333' } }, y: { ticks: { color: '#333' } } } }
+    });
+  }
+
+  // ── Workout Frequency Chart ──
+  if (frequencyChartInstance) frequencyChartInstance.destroy();
+  const fCtx = document.getElementById('frequencyChart').getContext('2d');
+
+  // Group by week for the last 8 weeks
+  const weekLabels = [];
+  const weekCounts = [];
+  for (let i = 7; i >= 0; i--) {
+    const wStart = new Date();
+    wStart.setDate(wStart.getDate() - (i * 7 + wStart.getDay()));
+    const wEnd = new Date(wStart);
+    wEnd.setDate(wEnd.getDate() + 6);
+    const startStr = wStart.toISOString().split('T')[0];
+    const endStr = wEnd.toISOString().split('T')[0];
+    weekLabels.push('Wk' + (8 - i));
+    weekCounts.push(log.filter(w => w.date >= startStr && w.date <= endStr).length);
+  }
+
+  frequencyChartInstance = new Chart(fCtx, {
+    type: 'bar',
+    data: {
+      labels: weekLabels,
+      datasets: [{
+        label: 'Sessions',
+        data: weekCounts,
+        backgroundColor: weekCounts.map((c, i) => i === weekCounts.length - 1 ? 'rgba(0,255,136,0.6)' : 'rgba(0,255,136,0.25)'),
+        borderColor: 'rgba(0,255,136,0.8)',
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#555', font: { family: 'JetBrains Mono', size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#333', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { ticks: { color: '#333', font: { size: 9 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+// ── Init ──
+refreshMetrics();
+renderLog();
+buildCharts();
+
+// Pre-fill measurement fields with latest values
+(function prefillMeasurements() {
+  const m = FitStore.getMeasurements();
+  if (m.length > 0) {
+    if (m[0].weight) document.getElementById('m_weight').placeholder = m[0].weight;
+    if (m[0].body_fat) document.getElementById('m_fat').placeholder = m[0].body_fat;
+  }
+})();
+
+async function runAnalysis() {
+  const el = document.getElementById('analysisResult');
+  el.innerHTML = '<div class="loading-screen" style="padding:3rem"><div class="spinner"></div><div class="loading-label">ANALYZING YOUR DATA...</div></div>';
+
+  const log = FitStore.getWorkoutLog();
+  const profile = FitStore.getProfile();
+  const measurements = FitStore.getMeasurements();
+  const stats = FitStore.getStats();
+
+  try {
+    const r = await fetch('/api/analyze-progress', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        profile: {
+          goal: profile.goal,
+          fitness_level: profile.fitness_level,
+          weight: stats.latestWeight,
+          streak: stats.streak,
+          totalWorkouts: stats.totalWorkouts
+        },
+        workouts: log.slice(0, 12),
+        measurements: measurements.slice(0, 6)
+      })
+    });
+    const data = await r.json();
+    if (data.success) {
+      const a = data.analysis;
+      el.innerHTML = `
+        <div class="g2" style="gap:1rem;">
+          <div>
+            <div class="alert alert-green mb2"><i class="fas fa-chart-line"></i> ${a.overall_assessment||''}</div>
+            ${a.strengths?.length ? `<div class="card-label">// STRENGTHS</div>
+              ${a.strengths.map(s=>`<div class="alert alert-green">${s}</div>`).join('')}` : ''}
+            ${a.areas_to_improve?.length ? `<div class="card-label mt1">// IMPROVE</div>
+              ${a.areas_to_improve.map(s=>`<div class="alert alert-yellow">${s}</div>`).join('')}` : ''}
+          </div>
+          <div>
+            ${a.estimated_progress ? `
+              <div class="card-label">// ESTIMATED PROGRESS</div>
+              <div class="card mb2" style="background:var(--black3);">
+                <div class="pb-row"><div class="pb-head"><span>STRENGTH</span><span>${a.estimated_progress.strength_gain||''}</span></div><div class="pb-track"><div class="pb-fill" style="width:75%"></div></div></div>
+                <div class="pb-row"><div class="pb-head"><span>ENDURANCE</span><span>${a.estimated_progress.endurance_improvement||''}</span></div><div class="pb-track"><div class="pb-fill blue" style="width:65%"></div></div></div>
+                <div class="pb-row"><div class="pb-head"><span>CONSISTENCY</span><span>${a.estimated_progress.consistency_score||0}%</span></div><div class="pb-track"><div class="pb-fill" style="width:${a.estimated_progress.consistency_score||70}%;background:var(--green)"></div></div></div>
+              </div>` : ''}
+            ${a.recommendations?.length ? `<div class="card-label">// RECOMMENDATIONS</div>
+              ${a.recommendations.map(r=>`<div class="alert alert-blue">${r}</div>`).join('')}` : ''}
+            ${a.motivational_message ? `<div class="alert alert-green mt1" style="font-style:italic;"><i class="fas fa-star"></i> "${a.motivational_message}"</div>` : ''}
+          </div>
+        </div>`;
+    } else {
+      el.innerHTML = '<div class="alert alert-red">Error. Check your API key.</div>';
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="alert alert-red">Network error: ' + e.message + '</div>';
+  }
+}
+</script>
+{% endblock %}
