@@ -1,313 +1,466 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>LOGIN — FITAI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="/static/css/main.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Barlow:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/static/css/main.css" />
   <style>
-    body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:1rem; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
     body::after {
-      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
       background-image:
-        linear-gradient(rgba(0,255,136,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,136,0.02) 1px, transparent 1px);
-      background-size:80px 80px;
+        linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
     }
-    .login-container { position:relative; z-index:1; width:100%; max-width:460px; }
-    .login-header { text-align:center; margin-bottom:2rem; }
+
+    .login-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
     .login-logo {
-      font-family:'Black Han Sans',sans-serif; font-size:3rem; letter-spacing:6px; margin-bottom:0.5rem;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 3rem;
+      letter-spacing: 6px;
+      margin-bottom: 0.5rem;
     }
-    .login-logo em { color:var(--green); font-style:normal; }
+
+    .login-logo em {
+      color: var(--green);
+      font-style: normal;
+    }
+
     .login-sub {
-      font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:3px;
-      text-transform:uppercase; color:var(--gray);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gray);
     }
+
     .login-card {
-      background:var(--black2); border:2px solid var(--border2); padding:2rem;
-      transition:border-color 0.2s;
+      background: var(--black2);
+      border: 2px solid var(--border2);
+      padding: 2rem;
+      transition: border-color 0.2s;
     }
-    .login-card:hover { border-color:var(--green); }
-    .login-tabs { display:flex; border-bottom:2px solid var(--border2); margin-bottom:1.5rem; }
+
+    .login-card:hover {
+      border-color: var(--green);
+    }
+
+    .login-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border2);
+      margin-bottom: 1.5rem;
+    }
+
     .login-tab {
-      flex:1; padding:0.75rem; text-align:center;
-      font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:800;
-      letter-spacing:3px; text-transform:uppercase;
-      background:none; color:var(--gray); border:none; border-bottom:2px solid transparent;
-      margin-bottom:-2px; cursor:pointer; transition:all 0.15s;
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: none;
+      color: var(--gray);
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .login-tab:hover { color:var(--white); }
-    .login-tab.active { color:var(--green); border-bottom-color:var(--green); }
-    .login-pane { display:none; }
-    .login-pane.active { display:block; }
+
+    .login-tab:hover {
+      color: var(--white);
+    }
+
+    .login-tab.active {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+
+    .login-pane {
+      display: none;
+    }
+
+    .login-pane.active {
+      display: block;
+    }
+
     .form-error {
-      background:rgba(255,59,59,0.08); border:1px solid var(--red); color:var(--red);
-      padding:0.6rem 0.85rem; font-family:'JetBrains Mono',monospace; font-size:0.7rem;
-      letter-spacing:1px; margin-bottom:1rem; display:none;
+      background: rgba(255, 59, 59, 0.08);
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 0.6rem 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      display: none;
     }
-    .form-error.show { display:block; }
+
+    .form-error.show {
+      display: block;
+    }
+
     .divider {
-      display:flex; align-items:center; gap:1rem; margin:1.5rem 0;
-      font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--gray2);
-      letter-spacing:2px; text-transform:uppercase;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--gray2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
-    .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border2); }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border2);
+    }
+
     .google-btn {
-      width:100%; padding:0.8rem; display:flex; align-items:center; justify-content:center; gap:0.75rem;
-      background:var(--black3); border:2px solid var(--border2); color:var(--white);
-      font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:700;
-      letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.15s;
+      width: 100%;
+      padding: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: var(--black3);
+      border: 2px solid var(--border2);
+      color: var(--white);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .google-btn:hover { border-color:var(--white); transform:translate(-2px,-2px); box-shadow:4px 4px 0 var(--border2); }
-    .google-btn svg { width:18px; height:18px; }
+
+    .google-btn:hover {
+      border-color: var(--white);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--border2);
+    }
+
+    .google-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
     .login-footer {
-      text-align:center; margin-top:1.5rem;
-      font-family:'JetBrains Mono',monospace; font-size:0.6rem; letter-spacing:2px; color:var(--gray2);
+      text-align: center;
+      margin-top: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: var(--gray2);
     }
-    .login-footer a { color:var(--green); }
+
+    .login-footer a {
+      color: var(--green);
+    }
+
     .login-glow {
-      position:fixed; top:30%; left:50%; transform:translateX(-50%);
-      width:500px; height:500px;
-      background:radial-gradient(circle, rgba(0,255,136,0.04) 0%, transparent 70%);
-      pointer-events:none; z-index:0;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
+
     .pass-toggle {
-      position:absolute; right:0.75rem; top:50%; transform:translateY(-50%);
-      background:none; border:none; color:var(--gray); cursor:pointer; font-size:0.85rem;
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      font-size: 0.85rem;
     }
-    .pass-toggle:hover { color:var(--green); }
-    #google-btn-wrap { display:flex; justify-content:center; margin-top:0.5rem; }
+
+    .pass-toggle:hover {
+      color: var(--green);
+    }
+
+    #google-btn-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
+
 <body>
 
-<div class="login-glow"></div>
+  <div class="login-glow"></div>
 
-<div class="login-container">
-  <div class="login-header">
-    <div class="login-logo">FIT<em>AI</em></div>
-    <div class="login-sub">adaptive workout intelligence</div>
-  </div>
-
-  <div class="login-card">
-    <div class="login-tabs">
-      <button class="login-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
-      <button class="login-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">FIT<em>AI</em></div>
+      <div class="login-sub">adaptive workout intelligence</div>
     </div>
 
-    <div class="form-error" id="authError"></div>
+    <div class="login-card">
+      <div class="login-tabs">
+        <button class="login-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+        <button class="login-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+      </div>
 
-    <!-- LOGIN PANE -->
-    <div class="login-pane active" id="pane-login">
-      <div class="form-row">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" id="login_email" placeholder="athlete@email.com" autocomplete="email"/>
+      <div class="form-error" id="authError"></div>
+
+      <!-- LOGIN PANE -->
+      <div class="login-pane active" id="pane-login">
+        <div class="form-row">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="login_email" placeholder="athlete@email.com"
+            autocomplete="email" />
+        </div>
+        <div class="form-row" style="position:relative;">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="login_pass" placeholder="••••••••"
+            autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+          <button class="pass-toggle" onclick="togglePass('login_pass',this)" type="button"><i
+              class="fas fa-eye"></i></button>
+        </div>
+        <button class="btn btn-green btn-full btn-lg" style="margin-top:0.5rem;" onclick="doLogin()" id="loginBtn">
+          <i class="fas fa-arrow-right"></i> SIGN IN
+        </button>
       </div>
-      <div class="form-row" style="position:relative;">
-        <label class="form-label">Password</label>
-        <input type="password" class="form-control" id="login_pass" placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')doLogin()"/>
-        <button class="pass-toggle" onclick="togglePass('login_pass',this)" type="button"><i class="fas fa-eye"></i></button>
+
+      <!-- REGISTER PANE -->
+      <div class="login-pane" id="pane-register">
+        <div class="form-row">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-control" id="reg_name" placeholder="Your name" autocomplete="name" />
+        </div>
+        <div class="form-row">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="reg_email" placeholder="athlete@email.com"
+            autocomplete="email" />
+        </div>
+        <div class="form-row" style="position:relative;">
+          <label class="form-label">Password (min 8 chars)</label>
+          <input type="password" class="form-control" id="reg_pass" placeholder="••••••••" autocomplete="new-password"
+            onkeydown="if(event.key==='Enter')doRegister()" />
+          <button class="pass-toggle" onclick="togglePass('reg_pass',this)" type="button"><i
+              class="fas fa-eye"></i></button>
+        </div>
+        <button class="btn btn-green btn-full btn-lg" style="margin-top:0.5rem;" onclick="doRegister()" id="regBtn">
+          <i class="fas fa-user-plus"></i> CREATE ACCOUNT
+        </button>
       </div>
-      <button class="btn btn-green btn-full btn-lg" style="margin-top:0.5rem;" onclick="doLogin()" id="loginBtn">
-        <i class="fas fa-arrow-right"></i> SIGN IN
-      </button>
+
+      <!-- Google Sign-In -->
+      <div id="googleSection" style="display:none;">
+        <div class="divider">or continue with</div>
+        <div id="google-btn-wrap"></div>
+      </div>
     </div>
 
-    <!-- REGISTER PANE -->
-    <div class="login-pane" id="pane-register">
-      <div class="form-row">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-control" id="reg_name" placeholder="Your name" autocomplete="name"/>
-      </div>
-      <div class="form-row">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" id="reg_email" placeholder="athlete@email.com" autocomplete="email"/>
-      </div>
-      <div class="form-row" style="position:relative;">
-        <label class="form-label">Password (min 8 chars)</label>
-        <input type="password" class="form-control" id="reg_pass" placeholder="••••••••" autocomplete="new-password"
-          onkeydown="if(event.key==='Enter')doRegister()"/>
-        <button class="pass-toggle" onclick="togglePass('reg_pass',this)" type="button"><i class="fas fa-eye"></i></button>
-      </div>
-      <button class="btn btn-green btn-full btn-lg" style="margin-top:0.5rem;" onclick="doRegister()" id="regBtn">
-        <i class="fas fa-user-plus"></i> CREATE ACCOUNT
-      </button>
-    </div>
-
-    <!-- Google Sign-In -->
-    <div id="googleSection" style="display:none;">
-      <div class="divider">or continue with</div>
-      <div id="google-btn-wrap"></div>
-    </div>
-  </div>
-
-  <div class="login-footer">
+    <!-- <div class="login-footer">
     POWERED BY <a href="#">OPENROUTER</a> · MULTI-MODEL AI
+  </div> -->
   </div>
-</div>
 
-<script>
-// ═══════════════════════════════════════
-//  TAB SWITCHING
-// ═══════════════════════════════════════
-function switchTab(tab) {
-  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
-  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
-  document.getElementById('pane-login').classList.toggle('active', tab === 'login');
-  document.getElementById('pane-register').classList.toggle('active', tab === 'register');
-  hideError();
-}
-
-function showError(msg) {
-  const el = document.getElementById('authError');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function hideError() { document.getElementById('authError').classList.remove('show'); }
-
-function togglePass(id, btn) {
-  const input = document.getElementById(id);
-  const icon = btn.querySelector('i');
-  if (input.type === 'password') { input.type = 'text'; icon.className = 'fas fa-eye-slash'; }
-  else { input.type = 'password'; icon.className = 'fas fa-eye'; }
-}
-
-// ═══════════════════════════════════════
-//  EMAIL/PASSWORD AUTH
-// ═══════════════════════════════════════
-async function doLogin() {
-  hideError();
-  const email = document.getElementById('login_email').value.trim();
-  const password = document.getElementById('login_pass').value;
-  if (!email || !password) { showError('Please fill in all fields.'); return; }
-
-  const btn = document.getElementById('loginBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SIGNING IN...';
-
-  try {
-    const r = await fetch('/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-      credentials: 'same-origin'
-    });
-    const data = await r.json();
-    if (data.success) {
-      window.location.href = '/dashboard';
-    } else {
-      showError(data.error || 'Login failed.');
+  <script>
+    // ═══════════════════════════════════════
+    //  TAB SWITCHING
+    // ═══════════════════════════════════════
+    function switchTab(tab) {
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('pane-login').classList.toggle('active', tab === 'login');
+      document.getElementById('pane-register').classList.toggle('active', tab === 'register');
+      hideError();
     }
-  } catch(e) {
-    showError('Network error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-arrow-right"></i> SIGN IN';
-  }
-}
 
-async function doRegister() {
-  hideError();
-  const name = document.getElementById('reg_name').value.trim();
-  const email = document.getElementById('reg_email').value.trim();
-  const password = document.getElementById('reg_pass').value;
-  if (!email || !password) { showError('Email and password are required.'); return; }
-  if (password.length < 8) { showError('Password must be at least 8 characters.'); return; }
-
-  const btn = document.getElementById('regBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CREATING...';
-
-  try {
-    const r = await fetch('/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-      credentials: 'same-origin'
-    });
-    const data = await r.json();
-    if (data.success) {
-      window.location.href = '/dashboard';
-    } else {
-      showError(data.error || 'Registration failed.');
+    function showError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg;
+      el.classList.add('show');
     }
-  } catch(e) {
-    showError('Network error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-user-plus"></i> CREATE ACCOUNT';
-  }
-}
+    function hideError() { document.getElementById('authError').classList.remove('show'); }
 
-// ═══════════════════════════════════════
-//  GOOGLE OAUTH (FedCM / GSI)
-// ═══════════════════════════════════════
-function initGoogleSignIn() {
-  // Check if server has Google configured
-  fetch('/auth/google-config')
-    .then(r => r.json())
-    .then(cfg => {
-      if (!cfg.client_id) return; // Not configured
+    function togglePass(id, btn) {
+      const input = document.getElementById(id);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') { input.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+      else { input.type = 'password'; icon.className = 'fas fa-eye'; }
+    }
 
-      // Show the Google section
-      document.getElementById('googleSection').style.display = 'block';
+    // ═══════════════════════════════════════
+    //  EMAIL/PASSWORD AUTH
+    // ═══════════════════════════════════════
+    async function doLogin() {
+      hideError();
+      const email = document.getElementById('login_email').value.trim();
+      const password = document.getElementById('login_pass').value;
+      if (!email || !password) { showError('Please fill in all fields.'); return; }
 
-      // Load the Google GSI script
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.onload = function() {
-        google.accounts.id.initialize({
-          client_id: cfg.client_id,
-          callback: handleGoogleCredential,
-          auto_select: false,
-          cancel_on_tap_outside: true,
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SIGNING IN...';
+
+      try {
+        const r = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'same-origin'
         });
-        // Render the official Google Sign-In button
-        google.accounts.id.renderButton(
-          document.getElementById('google-btn-wrap'),
-          {
-            type: 'standard',
-            theme: 'filled_black',
-            size: 'large',
-            text: 'continue_with',
-            shape: 'rectangular',
-            width: 380,
-          }
-        );
-      };
-      document.head.appendChild(script);
-    })
-    .catch(() => {}); // silently ignore if endpoint doesn't exist
-}
-
-async function handleGoogleCredential(response) {
-  hideError();
-  try {
-    const r = await fetch('/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: response.credential }),
-      credentials: 'same-origin'
-    });
-    const data = await r.json();
-    if (data.success) {
-      window.location.href = '/dashboard';
-    } else {
-      showError(data.error || 'Google login failed.');
+        const data = await r.json();
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else {
+          showError(data.error || 'Login failed.');
+        }
+      } catch (e) {
+        showError('Network error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-arrow-right"></i> SIGN IN';
+      }
     }
-  } catch(e) {
-    showError('Network error: ' + e.message);
-  }
-}
 
-// Init on load
-initGoogleSignIn();
-</script>
+    async function doRegister() {
+      hideError();
+      const name = document.getElementById('reg_name').value.trim();
+      const email = document.getElementById('reg_email').value.trim();
+      const password = document.getElementById('reg_pass').value;
+      if (!email || !password) { showError('Email and password are required.'); return; }
+      if (password.length < 8) { showError('Password must be at least 8 characters.'); return; }
+
+      const btn = document.getElementById('regBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CREATING...';
+
+      try {
+        const r = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+          credentials: 'same-origin'
+        });
+        const data = await r.json();
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else {
+          showError(data.error || 'Registration failed.');
+        }
+      } catch (e) {
+        showError('Network error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> CREATE ACCOUNT';
+      }
+    }
+
+    // ═══════════════════════════════════════
+    //  GOOGLE OAUTH (FedCM / GSI)
+    // ═══════════════════════════════════════
+    function initGoogleSignIn() {
+      // Check if server has Google configured
+      fetch('/auth/google-config')
+        .then(r => r.json())
+        .then(cfg => {
+          if (!cfg.client_id) return; // Not configured
+
+          // Show the Google section
+          document.getElementById('googleSection').style.display = 'block';
+
+          // Load the Google GSI script
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.onload = function () {
+            google.accounts.id.initialize({
+              client_id: cfg.client_id,
+              callback: handleGoogleCredential,
+              auto_select: false,
+              cancel_on_tap_outside: true,
+            });
+            // Render the official Google Sign-In button
+            google.accounts.id.renderButton(
+              document.getElementById('google-btn-wrap'),
+              {
+                type: 'standard',
+                theme: 'filled_black',
+                size: 'large',
+                text: 'continue_with',
+                shape: 'rectangular',
+                width: 380,
+              }
+            );
+          };
+          document.head.appendChild(script);
+        })
+        .catch(() => { }); // silently ignore if endpoint doesn't exist
+    }
+
+    async function handleGoogleCredential(response) {
+      hideError();
+      try {
+        const r = await fetch('/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential }),
+          credentials: 'same-origin'
+        });
+        const data = await r.json();
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else {
+          showError(data.error || 'Google login failed.');
+        }
+      } catch (e) {
+        showError('Network error: ' + e.message);
+      }
+    }
+
+    // Init on load
+    initGoogleSignIn();
+  </script>
 </body>
+
 </html>
